@@ -143,7 +143,7 @@ const useForest = (cfg: ExtendedConfig) => {
             // user navigate
             targetLocation = navFromUrl;
         }
-        if (!targetLocation || navFromUrl === targetLocation) {
+        if (!targetLocation || navFromUrl === targetLocation || navFromApp === targetLocation) {
             return;
         }
 
