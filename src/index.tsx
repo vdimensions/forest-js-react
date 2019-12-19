@@ -132,31 +132,38 @@ const useForest = (cfg: ExtendedConfig) => {
         const navFromApp = appContext.state ? appContext.state.template : '', 
               navFromLoc = urlTemplate,//location.state ? location.state.template : '', 
               navFromUrl = urlTemplate;
+        let isServerSideNavigate = false;
         let targetLocation = '';
         if (!navFromApp) {
             // initial load
             targetLocation = (navFromUrl || cfg.initialTemplate);
         } else if (navFromLoc === navFromUrl && navFromLoc !== navFromApp) {
-            // server-side navigate
+            // possible server-side navigate
             targetLocation = isBackButtonPressed ? navFromLoc : navFromApp;
+            isServerSideNavigate = !isBackButtonPressed;
         } else if (navFromLoc === navFromApp && navFromApp !== navFromUrl) {
             // user navigate
             targetLocation = navFromUrl;
         }
-        if (!targetLocation || navFromUrl === targetLocation || navFromApp === targetLocation) {
+        if (!targetLocation) {
             return;
         }
 
-        appContext.engine.navigate(targetLocation).then((appContext: AppContext | undefined) => {
-            if (!appContext) {
-                return;
-            }
-            if (!isBackButtonPressed) {
-                history.push(appContext.state.template, appContext.state);
-            } else {
-                setBackbuttonPressed(false);
-            }
-        });
+        if (isServerSideNavigate) {
+            history.push(appContext.state.template, appContext.state);
+            
+        } else {
+            appContext.engine.navigate(targetLocation).then((appContext: AppContext | undefined) => {
+                if (!appContext) {
+                    return;
+                }
+                if (!isBackButtonPressed) {
+                    history.push(appContext.state.template, appContext.state);
+                } else {
+                    setBackbuttonPressed(false);
+                }
+            });
+        }
         
         return () => {
             window.removeEventListener('popstate', backButtonOn);
