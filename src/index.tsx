@@ -1,9 +1,12 @@
-import React, { useState, Attributes, useContext, useEffect } from 'react';
+import React, { Attributes, useContext, useEffect, useState } from 'react';
 import * as Immutable from "immutable";
 import * as Forest from "@vdimensions/forest-js";
 import { BrowserRouter as Router, Switch } from "react-router-dom";
-import { Route, useLocation, useHistory } from 'react-router';
-import { History, Location } from 'history';
+import { Route, useHistory } from 'react-router';
+import { History } from 'history';
+import { useSelector, Provider } from 'react-redux';
+import { AppContext } from '@vdimensions/forest-js';
+import { createStore } from 'redux';
 
 const AppStateContext = React.createContext(Forest.AppContext.empty());
 const useAppContext = () => useContext(AppStateContext);
@@ -66,7 +69,7 @@ export const RegisterComponent = <T extends {}>(name: string, component: FC<T>) 
                 appContext.engine.invokeCommand(vs.instanceId, name, arg);
             });
         const regions = Immutable.Map<string, string[]>(vs.regions);
-        console.log("Rendering view: " + ctx.name + " #" + ctx.instanceId);
+        //console.log("Rendering view: " + ctx.name + " #" + ctx.instanceId);
         return (
             <RegionContext.Provider value={regions}>
                 {component(ctx)}
@@ -87,7 +90,7 @@ type RegionContentData = {
 const RegionComponent : React.FC<RegionContentData> & { whyDidYouRender : boolean } = (props: RegionContentData) => {
     const appContext = useAppContext();
     const regionContext: Immutable.Map<string, string[]> = useRegionContext();
-    console.log("Rendering region: " + props.name);
+    //console.log("Rendering region: " + props.name);
     return renderRegionContents(appContext, regionContext.get(props.name));
 };
 RegionComponent.whyDidYouRender = true;
@@ -95,65 +98,104 @@ export const Region = React.memo(RegionComponent, defaultShouldComponentUpdate);
 
 export type ForestConfig = {
     initialTemplate: string,
-    client: Forest.IForestClient
+    client: Forest.IForestClient,
+    store?: any
 }
 
-const syncContext = (appContext: Forest.AppContext, history: History<any>) => {
-    if (appContext.state.template) {
-        history.push(appContext.state.template, appContext.state);
-    }
+type ExtendedConfig = {
+    initialTemplate: string,
+    client: Forest.IForestClient,
+    store?: any,
+    selector: any
 }
 
-const useNavigation = (config: ForestConfig) => {
-    
-    const [appContext, setContext] = useState(Forest.AppContext.empty());
-    let location: Location<any> = useLocation();
-    let history: History<any> = useHistory();
+function createFallbackStore() {
+    const noopReducer = (state: any) => {
+        return state;
+    };
+    return createStore(noopReducer, {});
+}
+
+const useForest = (cfg: ExtendedConfig) => {
+    const history: History<any> = useHistory();
+    const appContext: AppContext = useSelector(cfg.selector);
+    const [isBackButtonPressed, setBackbuttonPressed] = useState(false);
+    const backButtonOn = () => {
+        console.log("back button");
+        setBackbuttonPressed(true);
+    };
     useEffect(() => {
-        if (!location) {
+        if (!appContext) {
             return;
         }
-        let navTemplate = (location.pathname && location.pathname.substr(1).replace(/\/$/, "")) || config.initialTemplate;
-        if (location.state && location.state.template === navTemplate && appContext.state.instances.count()) {
-            // this is application-triggered redirect, do not do anything
-            console.log("Skip navigation");
-        } else {
-            const engine : Forest.ForestEngine = Forest.CreateEngine(config.client);
-            engine.subscribe(appContext => {
-                syncContext(appContext, history);
-                setContext(appContext);
-            });
-            engine.navigate(navTemplate).then(appContext => {
-                if (appContext) {
-                    syncContext(appContext, history);
+        window.addEventListener('popstate', backButtonOn);
+        const urlTemplate = (window.location.pathname && window.location.pathname.substr(1).replace(/\/$/, ""));
+        const navFromApp = appContext.state ? appContext.state.template : '', 
+              navFromLoc = urlTemplate,//location.state ? location.state.template : '', 
+              navFromUrl = urlTemplate;
+        let targetLocation = '';
+        if (!navFromApp) {
+            // initial load
+            targetLocation = navFromUrl||cfg.initialTemplate;
+            console.log("initial load");
+        } else if (navFromLoc === navFromUrl && navFromLoc !== navFromApp) {
+            // server-side navigate
+            targetLocation = isBackButtonPressed ? navFromLoc : (navFromApp);
+            console.log(`server-side navigate, back button is ${isBackButtonPressed ? '' : 'not '}pressed`);
+        } else if (navFromLoc === navFromApp && navFromApp !== navFromUrl) {
+            // user navigate
+            targetLocation = navFromUrl;
+            console.log("user navigate");
+        }
+        if (!targetLocation) {
+            return;
+        }
+        
+        console.log(`app: ${navFromApp} | loc: ${navFromLoc} | nav: ${navFromUrl}`);
+
+        appContext.engine.navigate(targetLocation).then((appContext: AppContext | undefined) => {
+            if (appContext) {
+                if (!isBackButtonPressed) {
+                    history.push(appContext.state.template, appContext.state);
+                } else {
+                    setBackbuttonPressed(false);
                 }
-            });
-            console.log("Rendering template: " + navTemplate);
+            }
+        });
+        return () => {
+            window.removeEventListener('popstate', backButtonOn);
         }
     },
-    [location, history, config, appContext]);
+    [history, appContext, cfg, isBackButtonPressed]);
     return appContext;
 };
 
-const Template : React.FC<ForestConfig> & { whyDidYouRender : boolean } = (config) => {
-    let appContext = useNavigation(config);
+const Template : React.FC<ExtendedConfig> & { whyDidYouRender : boolean } = (config) => {
+    let appContext = useForest(config);
     return (
         <AppStateContext.Provider value={appContext}>
-            {renderRegionContents(appContext, (appContext.state.hierarchy.get("") || []))}
+            {renderRegionContents(appContext, ((appContext && appContext.state.hierarchy.get("")) || []))}
         </AppStateContext.Provider>
     );
 };
 Template.whyDidYouRender = true;
 
 export const Shell : React.FC<ForestConfig> = (config) => {
+    let cfg = {...config };
+    if (!cfg.store) {
+        cfg = { ...cfg, store: createFallbackStore() };
+    }
+    const selector = Forest.CreateEngine(cfg.client, cfg.store);
+    const extendedCfg = {...cfg, selector: selector}
     return (
-        <Router>
-            <Switch>
-                <Route path="*">
-                    <Template {...config} />
-                </Route>
-            </Switch>
-        </Router>
+        <Provider store={cfg.store}>
+            <Router>
+                <Switch>
+                    <Route path="*">
+                        <Template {...extendedCfg} />
+                    </Route>
+                </Switch>
+            </Router>
+        </Provider>
     );
 };
-//export const Shell = Template;
