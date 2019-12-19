@@ -152,7 +152,7 @@ const useForest = (cfg: ExtendedConfig) => {
         if (isServerSideNavigate) {
             history.push(appContext.state.template, appContext.state);
             
-        } else {
+        } else if (!isBackButtonPressed) {
             appContext.engine.navigate(targetLocation).then((appContext: AppContext | undefined) => {
                 if (!appContext) {
                     return;
