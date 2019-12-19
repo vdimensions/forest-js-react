@@ -135,29 +135,28 @@ const useForest = (cfg: ExtendedConfig) => {
         let targetLocation = '';
         if (!navFromApp) {
             // initial load
-            targetLocation = navFromUrl||cfg.initialTemplate;
+            targetLocation = (navFromUrl || cfg.initialTemplate);
         } else if (navFromLoc === navFromUrl && navFromLoc !== navFromApp) {
             // server-side navigate
-            targetLocation = isBackButtonPressed ? navFromLoc : (navFromApp);
+            targetLocation = isBackButtonPressed ? navFromLoc : navFromApp;
         } else if (navFromLoc === navFromApp && navFromApp !== navFromUrl) {
             // user navigate
             targetLocation = navFromUrl;
         }
-        if (!targetLocation) {
+        if (!targetLocation || navFromUrl === targetLocation) {
             return;
         }
 
-        if (appContext.state.template !== targetLocation) {
-            appContext.engine.navigate(targetLocation).then((appContext: AppContext | undefined) => {
-                if (appContext) {
-                    if (!isBackButtonPressed) {
-                        history.push(appContext.state.template, appContext.state);
-                    } else {
-                        setBackbuttonPressed(false);
-                    }
-                }
-            });
-        }
+        appContext.engine.navigate(targetLocation).then((appContext: AppContext | undefined) => {
+            if (!appContext) {
+                return;
+            }
+            if (!isBackButtonPressed) {
+                history.push(appContext.state.template, appContext.state);
+            } else {
+                setBackbuttonPressed(false);
+            }
+        });
         
         return () => {
             window.removeEventListener('popstate', backButtonOn);
