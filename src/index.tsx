@@ -161,8 +161,16 @@ const useForest = (cfg: ExtendedConfig) => {
                     }   
                 }
             } else if (history.location.state) {
-                appContext.engine.render(history.location.state);
-                setBackbuttonPressed(false);
+                appContext.engine.navigate(history.location.state.template).then((appContext: AppContext | undefined) => {
+                    if (!appContext) {
+                        return;
+                    }
+                    if (!isBackButtonPressed) {
+                        history.push(appContext.state.template, appContext.state);
+                    } else {
+                        setBackbuttonPressed(false);
+                    }
+                });
             }
         }
         return () => {
