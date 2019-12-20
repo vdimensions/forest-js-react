@@ -163,6 +163,7 @@ const useForest = (cfg: ExtendedConfig) => {
                 }
             } else {
                 history.goBack();
+                setBackbuttonPressed(false);
             }
         }
         return () => {
