@@ -149,20 +149,22 @@ const useForest = (cfg: ExtendedConfig) => {
             return;
         }
 
-        if (isServerSideNavigate) {
-            history.push(appContext.state.template, appContext.state);
-            
-        } else if (!isBackButtonPressed) {
-            appContext.engine.navigate(targetLocation).then((appContext: AppContext | undefined) => {
-                if (!appContext) {
-                    return;
-                }
-                if (!isBackButtonPressed) {
-                    history.push(appContext.state.template, appContext.state);
-                } else {
-                    setBackbuttonPressed(false);
-                }
-            });
+        if (!isBackButtonPressed) {
+            if (isServerSideNavigate) {
+                history.push(appContext.state.template, appContext.state);
+                
+            } else {
+                appContext.engine.navigate(targetLocation).then((appContext: AppContext | undefined) => {
+                    if (!appContext) {
+                        return;
+                    }
+                    if (!isBackButtonPressed) {
+                        history.push(appContext.state.template, appContext.state);
+                    } else {
+                        setBackbuttonPressed(false);
+                    }
+                });
+            }
         } else {
             history.goBack();
         }
