@@ -137,11 +137,11 @@ const useForest = (cfg: ExtendedConfig) => {
                 targetLocation = (navFromUrl || cfg.initialTemplate);
             } else if (/*navFromLoc === navFromUrl && */navFromUrl !== navFromApp) {
                 // possible server-side navigate
-                targetLocation = isBackButtonPressed ? navFromLoc : navFromApp;
+                targetLocation = isBackButtonPressed ? navFromUrl : navFromApp;
                 isServerSideNavigate = !isBackButtonPressed;
-            } else if (/*navFromLoc === navFromApp && */navFromApp !== navFromUrl) {
-                // user navigate
-                targetLocation = navFromUrl;
+            //} else if (/*navFromLoc === navFromApp && */navFromApp !== navFromUrl) {
+            //    // user navigate
+            //    targetLocation = navFromUrl;
             }
 
             if (!isBackButtonPressed) {
