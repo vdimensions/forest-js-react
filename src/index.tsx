@@ -138,7 +138,6 @@ const useForest = (cfg: ExtendedConfig) => {
             } else if (/*navFromLoc === navFromUrl && */navFromUrl !== navFromApp) {
                 // possible server-side navigate
                 targetLocation = isBackButtonPressed ? navFromLoc : navFromApp;
-                isServerSideNavigate = !isBackButtonPressed;
             } else if (/*navFromLoc === navFromApp && */navFromApp !== navFromUrl) {
                 // user navigate
                 targetLocation = navFromUrl;
@@ -161,8 +160,8 @@ const useForest = (cfg: ExtendedConfig) => {
                         });
                     }   
                 }
-            } else {
-                history.goBack();
+            } else if (history.location.state) {
+                appContext.engine.render(history.location.state);
                 setBackbuttonPressed(false);
             }
         }
