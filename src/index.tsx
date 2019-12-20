@@ -122,7 +122,6 @@ const useForest = (cfg: ExtendedConfig) => {
     const [isBackButtonPressed, setBackbuttonPressed] = useState(false);
     const backButtonOn = () => {
         setBackbuttonPressed(true);
-        history.goBack();
     };
     useEffect(() => {
         window.addEventListener('popstate', backButtonOn);
@@ -164,6 +163,8 @@ const useForest = (cfg: ExtendedConfig) => {
                     setBackbuttonPressed(false);
                 }
             });
+        } else {
+            history.goBack();
         }
         
         return () => {
