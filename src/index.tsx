@@ -125,50 +125,46 @@ const useForest = (cfg: ExtendedConfig) => {
     };
     useEffect(() => {
         window.addEventListener('popstate', backButtonOn);
-        if (!appContext) {
-            return;
-        }
-        const urlTemplate = (window.location.pathname && window.location.pathname.substr(1).replace(/\/$/, ""));
-        const navFromApp = appContext.state ? appContext.state.template : '', 
-              navFromLoc = urlTemplate,//location.state ? location.state.template : '', 
-              navFromUrl = urlTemplate;
-        let isServerSideNavigate = false;
-        let targetLocation = '';
-        if (!navFromApp) {
-            // initial load
-            targetLocation = (navFromUrl || cfg.initialTemplate);
-        } else if (/*navFromLoc === navFromUrl && */navFromUrl !== navFromApp) {
-            // possible server-side navigate
-            targetLocation = isBackButtonPressed ? navFromLoc : navFromApp;
-            isServerSideNavigate = !isBackButtonPressed;
-        } else if (/*navFromLoc === navFromApp && */navFromApp !== navFromUrl) {
-            // user navigate
-            targetLocation = navFromUrl;
-        }
-        if (!targetLocation) {
-            return;
-        }
+        if (appContext) {
+            const urlTemplate = (window.location.pathname && window.location.pathname.substr(1).replace(/\/$/, ""));
+            const navFromApp = appContext.state ? appContext.state.template : '', 
+                navFromLoc = urlTemplate,//location.state ? location.state.template : '', 
+                navFromUrl = urlTemplate;
+            let isServerSideNavigate = false;
+            let targetLocation = '';
+            if (!navFromApp) {
+                // initial load
+                targetLocation = (navFromUrl || cfg.initialTemplate);
+            } else if (/*navFromLoc === navFromUrl && */navFromUrl !== navFromApp) {
+                // possible server-side navigate
+                targetLocation = isBackButtonPressed ? navFromLoc : navFromApp;
+                isServerSideNavigate = !isBackButtonPressed;
+            } else if (/*navFromLoc === navFromApp && */navFromApp !== navFromUrl) {
+                // user navigate
+                targetLocation = navFromUrl;
+            }
 
-        if (!isBackButtonPressed) {
-            if (isServerSideNavigate) {
-                history.push(appContext.state.template, appContext.state);
-                
-            } else {
-                appContext.engine.navigate(targetLocation).then((appContext: AppContext | undefined) => {
-                    if (!appContext) {
-                        return;
-                    }
-                    if (!isBackButtonPressed) {
+            if (!isBackButtonPressed) {
+                if (targetLocation) {
+                    if (isServerSideNavigate) {
                         history.push(appContext.state.template, appContext.state);
                     } else {
-                        setBackbuttonPressed(false);
-                    }
-                });
+                        appContext.engine.navigate(targetLocation).then((appContext: AppContext | undefined) => {
+                            if (!appContext) {
+                                return;
+                            }
+                            if (!isBackButtonPressed) {
+                                history.push(appContext.state.template, appContext.state);
+                            } else {
+                                setBackbuttonPressed(false);
+                            }
+                        });
+                    }   
+                }
+            } else {
+                history.goBack();
             }
-        } else {
-            history.goBack();
         }
-        
         return () => {
             window.removeEventListener('popstate', backButtonOn);
         }
