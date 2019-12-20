@@ -152,26 +152,14 @@ const useForest = (cfg: ExtendedConfig) => {
                             if (!appContext) {
                                 return;
                             }
-                            if (!isBackButtonPressed) {
-                                history.push(appContext.state.template, appContext.state);
-                            } else {
-                                setBackbuttonPressed(false);
-                            }
+                            history.push(appContext.state.template, appContext.state);
                         });
                     }   
                 }
             } else if (history.location.state) {
-                appContext.engine.navigate(history.location.state.template).then((appContext: AppContext | undefined) => {
-                    if (!appContext) {
-                        return;
-                    }
-                    if (!isBackButtonPressed) {
-                        history.push(appContext.state.template, appContext.state);
-                    } else {
-                        setBackbuttonPressed(false);
-                    }
-                });
+                appContext.engine.navigate(history.location.state.template);
             }
+            setBackbuttonPressed(false);
         }
         return () => {
             window.removeEventListener('popstate', backButtonOn);
