@@ -122,12 +122,13 @@ const useForest = (cfg: ExtendedConfig) => {
     const [isBackButtonPressed, setBackbuttonPressed] = useState(false);
     const backButtonOn = () => {
         setBackbuttonPressed(true);
+        history.goBack();
     };
     useEffect(() => {
+        window.addEventListener('popstate', backButtonOn);
         if (!appContext) {
             return;
         }
-        window.addEventListener('popstate', backButtonOn);
         const urlTemplate = (window.location.pathname && window.location.pathname.substr(1).replace(/\/$/, ""));
         const navFromApp = appContext.state ? appContext.state.template : '', 
               navFromLoc = urlTemplate,//location.state ? location.state.template : '', 
@@ -137,11 +138,11 @@ const useForest = (cfg: ExtendedConfig) => {
         if (!navFromApp) {
             // initial load
             targetLocation = (navFromUrl || cfg.initialTemplate);
-        } else if (navFromLoc === navFromUrl && navFromLoc !== navFromApp) {
+        } else if (/*navFromLoc === navFromUrl && */navFromUrl !== navFromApp) {
             // possible server-side navigate
             targetLocation = isBackButtonPressed ? navFromLoc : navFromApp;
             isServerSideNavigate = !isBackButtonPressed;
-        } else if (navFromLoc === navFromApp && navFromApp !== navFromUrl) {
+        } else if (/*navFromLoc === navFromApp && */navFromApp !== navFromUrl) {
             // user navigate
             targetLocation = navFromUrl;
         }
