@@ -128,7 +128,7 @@ const useForest = (cfg: ExtendedConfig) => {
         if (appContext) {
             const urlTemplate = (window.location.pathname && window.location.pathname.substr(1).replace(/\/$/, ""));
             const navFromApp = appContext.state ? appContext.state.template : '', 
-                navFromLoc = urlTemplate,//location.state ? location.state.template : '', 
+            //    navFromLoc = urlTemplate,//location.state ? location.state.template : '', 
                 navFromUrl = urlTemplate;
             let isServerSideNavigate = false;
             let targetLocation = '';
@@ -159,6 +159,7 @@ const useForest = (cfg: ExtendedConfig) => {
                 }
             } else if (history.location.state) {
                 appContext.engine.navigate(history.location.state.template);
+                history.goBack();
             }
             setBackbuttonPressed(false);
         }
