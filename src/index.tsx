@@ -69,7 +69,6 @@ export const RegisterComponent = <T extends {}>(name: string, component: FC<T>) 
                 appContext.engine.invokeCommand(vs.instanceId, name, arg);
             });
         const regions = Immutable.Map<string, string[]>(vs.regions);
-        //console.log("Rendering view: " + ctx.name + " #" + ctx.instanceId);
         return (
             <RegionContext.Provider value={regions}>
                 {component(ctx)}
@@ -90,7 +89,6 @@ type RegionContentData = {
 const RegionComponent : React.FC<RegionContentData> & { whyDidYouRender : boolean } = (props: RegionContentData) => {
     const appContext = useAppContext();
     const regionContext: Immutable.Map<string, string[]> = useRegionContext();
-    //console.log("Rendering region: " + props.name);
     return renderRegionContents(appContext, regionContext.get(props.name));
 };
 RegionComponent.whyDidYouRender = true;
@@ -186,8 +184,8 @@ export const Shell : React.FC<ForestConfig> = (config) => {
     if (!cfg.store) {
         cfg = { ...cfg, store: createFallbackStore() };
     }
-    const selector = Forest.CreateEngine(cfg.client, cfg.store);
-    const extendedCfg = {...cfg, selector: selector}
+    const engineSelector = Forest.CreateEngine(cfg.client, cfg.store);
+    const extendedCfg = {...cfg, selector: engineSelector}
     return (
         <Provider store={cfg.store}>
             <Router>
