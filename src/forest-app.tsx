@@ -19,7 +19,6 @@ const Navigator : React.FC<StoreProps> = memo((props) => {
         if (state && state instanceof ForestResponse && state.path) {
             dispatch(state)
         } else {
-            console.log("Navigating to path", pathname);
             navigate(pathname);
         }
     }, [pathname, state, navigate, dispatch]);
@@ -29,7 +28,6 @@ const Navigator : React.FC<StoreProps> = memo((props) => {
 const Shell: React.FC<StoreProps> = memo((props) => {
     const {useRootHierarchy} = props.store;
     const hierarchy = useRootHierarchy();
-    console.log("ForestComponentTree", hierarchy);
     return (
         <RegionContext.Provider value={hierarchy}>
             <Region name="" />
