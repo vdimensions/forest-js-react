@@ -1,7 +1,7 @@
 import React, {useCallback, useContext, useMemo} from "react";
 import { ForestStore } from "./hooks";
 import { RegionContext } from "./region";
-import { ComponentRegistryContext } from "./register-component";
+import { ComponentRegistryContext } from "./forest-view";
 
 const EMPTY_REGIONS = { };
 
