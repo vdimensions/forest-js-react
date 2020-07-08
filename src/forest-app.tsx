@@ -10,7 +10,7 @@ type StoreProps = {
     store: ForestStore;
 };
 
-const createPopStateCallback = (navigate: { (path: string) : Promise<void> }) => (e: any) => {
+const createPopStateCallback = (navigate: { (path: string) : void }) => (e: any) => {
     if (e.state && e.state.state) {
         navigate(e.state.state.path);
     }

@@ -1,7 +1,7 @@
 import React, { useContext, Dispatch, useCallback } from "react";
 import { ViewState, ForestResponse, RegionMap } from "@vdimensions/forest-js-frontend";
 import { useForestClient } from "./client-context";
-import { useHistory, useLocation } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { useViewContext } from "./view";
 
 const SLASH = '/';
@@ -40,8 +40,8 @@ export const useNavigate = () =>  {
     const dispach = useDispatch();
     const client = useForestClient();
     const {replace} = useHistory();
-    return useCallback(async (template: string) => {
-        await client
+    return useCallback((template: string) => {
+        client
             .navigate(template)
             .then(x => x as ForestResponse || EMPTY_FOREST_RESPONSE)
             .then(x => {
@@ -58,8 +58,8 @@ export const useCommand = ((command: string) =>  {
     const {push} = useHistory();
     const client = useForestClient();
     const instanceId = useViewContext();
-    return useCallback(async (arg?: any) => {
-        await client
+    return useCallback((arg?: any) => {
+        client
             .invokeCommand(instanceId, command, arg)
             .then(x => x as ForestResponse || EMPTY_FOREST_RESPONSE)
             .then(x => {
