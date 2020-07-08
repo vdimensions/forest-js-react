@@ -39,20 +39,17 @@ export const useNavigate = () =>  {
     const {useDispatch} = useForestSelectors();
     const dispach = useDispatch();
     const client = useForestClient();
-    const {pathname} = useLocation();
-    const {replace,push} = useHistory();
+    const {replace} = useHistory();
     return useCallback(async (template: string) => {
         await client
             .navigate(template)
+            .then(x => x as ForestResponse || EMPTY_FOREST_RESPONSE)
             .then(x => {
-                return x as ForestResponse || EMPTY_FOREST_RESPONSE
-            })
-            .then(x => {
-                (ensureStartSlash(pathname) === ensureStartSlash(x.path) ? replace : push)(ensureStartSlash(x.path), x);
+                replace(ensureStartSlash(x.path), x)
                 return x;
             })
             .then(dispach);
-    }, [client, dispach, push]);
+    }, [client, dispach, replace]);
 };
 
 export const useCommand = ((command: string) =>  {

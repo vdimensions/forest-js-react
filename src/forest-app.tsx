@@ -10,16 +10,25 @@ type StoreProps = {
     store: ForestStore;
 };
 
+const createPopStateCallback = (navigate: { (path: string) : Promise<void> }) => (e: any) => {
+    if (e.state && e.state.state) {
+        navigate(e.state.state.path);
+    }
+}
+
 const Navigator : React.FC<StoreProps> = memo((props) => { 
     const {pathname, state} = useLocation();
     const {useDispatch} = props.store;
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const popStateCallback = createPopStateCallback(navigate);
     useEffect(() => {
-        if (state && state instanceof ForestResponse && state.path) {
-            dispatch(state)
-        } else {
+        window.addEventListener("popstate", popStateCallback);
+        if (!state || !(state instanceof ForestResponse)) {
             navigate(pathname);
+        }
+        return () => {
+            window.removeEventListener("popstate", popStateCallback);
         }
     }, [pathname, state, navigate, dispatch]);
     return <React.Fragment />
