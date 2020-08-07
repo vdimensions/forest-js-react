@@ -1,5 +1,5 @@
 import React, { useContext, Dispatch, useCallback } from "react";
-import { ViewState, ForestResponse, RegionMap } from "@vdimensions/forest-js-frontend";
+import { ViewState, ForestResponse, RegionMap, Command } from "@vdimensions/forest-js-frontend";
 import { useForestClient } from "./client-context";
 import { useHistory } from "react-router-dom";
 import { useViewContext } from "./view";
@@ -35,7 +35,7 @@ export const ForestHooksDefault: ForestHooks & ForestStore = {
 export const ForestStoreContext = React.createContext<ForestStore>(ForestHooksDefault);
 export const useForestSelectors = () => useContext(ForestStoreContext);
 
-export const useNavigate = () =>  {
+export const useNavigate = () => {
     const {useDispatch} = useForestSelectors();
     const dispach = useDispatch();
     const client = useForestClient();
@@ -52,13 +52,15 @@ export const useNavigate = () =>  {
     }, [client, dispach, replace]);
 };
 
-export const useCommand = ((command: string) =>  {
-    const {useDispatch} = useForestSelectors();
+export const useCommand = ((command: string) => {
+    const {useDispatch, useViewState} = useForestSelectors();
     const dispach = useDispatch();
     const {push} = useHistory();
     const client = useForestClient();
     const instanceId = useViewContext();
-    return useCallback((arg?: any) => {
+    const viewState = useViewState(instanceId);
+    const cmd: Command|undefined = viewState?.commands[command];
+    const invoke = useCallback((arg?: any) => {
         client
             .invokeCommand(instanceId, command, arg)
             .then(x => x as ForestResponse || EMPTY_FOREST_RESPONSE)
@@ -68,4 +70,10 @@ export const useCommand = ((command: string) =>  {
             })
             .then(dispach);
     }, [command, instanceId, client, dispach, push]);
+    return {
+        invoke,
+        description: cmd?.description || "",
+        displayName: cmd?.displayName || "",
+        tooltip: cmd?.tooltip || ""
+    }
 });

@@ -10,7 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@vdimensions/forest-js-frontend": "^1.0.5",
+    "@vdimensions/forest-js-frontend": "^1.0.6",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.2.0"
