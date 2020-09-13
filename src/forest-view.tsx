@@ -1,5 +1,5 @@
-import React from 'react';
-import { pipe } from '@vdimensions/forest-js-frontend';
+import React from "react";
+import { pipe } from "@vdimensions/forest-js-frontend";
 
 export const ComponentRegistryContext = new Map<string, React.FC<any>>();
 
