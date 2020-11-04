@@ -10,20 +10,20 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@vdimensions/forest-js-frontend": "^1.1.1",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
+    "@vdimensions/forest-js-frontend": "^1.1.4",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
     "react-router-dom": "^5.2.0"
   },
   "devDependencies": {
     "@types/jest": "^25.2.3",
-    "@types/node": "^13.13.13",
-    "@types/react": "^16.9.41",
-    "@types/react-dom": "^16.9.8",
-    "@types/react-router-dom": "^5.1.5",
+    "@types/node": "^13.13.30",
+    "@types/react": "^16.9.55",
+    "@types/react-dom": "^16.9.9",
+    "@types/react-router-dom": "^5.1.6",
     "tslint": "^5.20.1",
     "tslint-react": "^4.2.0",
-    "typescript": "^3.9.6"
+    "typescript": "^3.9.7"
   },
   "author": "Virtual Dimensions",
   "license": "Apache-2.0",
