@@ -24,11 +24,12 @@ export const View : React.FC<ForestViewProps> = React.memo((props) => {
 
     const { viewState, viewKey, regions } = viewStateCallback();
 
+    type ModelWrapper = { model: any }
     const viewComponentCallback = useMemo(() => () => {
-        return React.memo((viewState && ComponentRegistryContext.get(viewState.name)) || EmptyView);
+        return React.memo((w: ModelWrapper) => ((viewState && ComponentRegistryContext.get(viewState.name)) || EmptyView)(w.model));
     }, [viewState]);
 
-    const ViewComponent: React.FC<any> = viewComponentCallback();
+    const ViewComponent: React.FC<ModelWrapper> = viewComponentCallback();
 
     if (!viewState) {
         console.log(`No viewstate`, props);
@@ -37,7 +38,7 @@ export const View : React.FC<ForestViewProps> = React.memo((props) => {
     return (
         <ViewContext.Provider value={props.instanceId}>
             <RegionContext.Provider value={regions}>
-                <ViewComponent key={viewKey} {...viewState?.model} />   
+                <ViewComponent key={viewKey} model={viewState?.model} />   
             </RegionContext.Provider>
         </ViewContext.Provider>
     );
