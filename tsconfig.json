@@ -22,7 +22,6 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true
   },
   "exclude": [
     "node_modules",
@@ -31,7 +30,6 @@
     ".appveyor.yml"
   ],
   "include": [
-    "src/*.tsx", 
-    "src/*.ts"
+    "src"
   ]
 }

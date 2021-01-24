@@ -8,7 +8,7 @@ const EMPTY_REGIONS = { };
 const ViewContext = React.createContext("");
 export const useViewContext = () => useContext(ViewContext);
 
-const EmptyView = (_: any) => <></>;
+const EmptyView = (_: any) => (<></>);
 
 export type ForestViewProps = {
     instanceId: string,
@@ -26,14 +26,13 @@ export const View : React.FC<ForestViewProps> = React.memo((props) => {
 
     type ModelWrapper = { model: any }
     const viewComponentCallback = useMemo(() => () => {
-        return React.memo((w: ModelWrapper) => ((viewState && ComponentRegistryContext.get(viewState.name)) || EmptyView)(w.model));
+        return React.memo((w: ModelWrapper) => {
+            var fn = ((viewState && ComponentRegistryContext.get(viewState.name)) || EmptyView);
+            return fn(w.model);
+        });
     }, [viewState]);
 
     const ViewComponent: React.FC<ModelWrapper> = viewComponentCallback();
-
-    if (!viewState) {
-        console.log(`No viewstate`, props);
-    }
 
     return (
         <ViewContext.Provider value={props.instanceId}>
