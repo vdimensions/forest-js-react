@@ -8,7 +8,7 @@ const EMPTY_REGIONS = { };
 const ViewContext = React.createContext("");
 export const useViewContext = () => useContext(ViewContext);
 
-const EmptyView = React.memo((_: any) => <></>, () => true);
+const EmptyView = (_: any) => <></>;
 
 export type ForestViewProps = {
     instanceId: string,
