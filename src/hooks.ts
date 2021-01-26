@@ -55,23 +55,36 @@ export const useNavigate = () => {
 export const useCommand = ((command: string) => {
     const {useDispatch, useViewState} = useForestSelectors();
     const dispach = useDispatch();
-    const {push} = useHistory();
+    const {push, replace} = useHistory();
     const client = useForestClient();
     const instanceId = useViewContext();
     const viewState = useViewState(instanceId);
     const cmd: Command|undefined = viewState?.commands[command];
+    const path = cmd?.path || "";
     const invoke = useCallback((arg?: any) => {
-        client
-            .invokeCommand(instanceId, command, arg)
-            .then(x => x as ForestResponse || EMPTY_FOREST_RESPONSE)
-            .then(x => {
-                push(ensureStartSlash(x.path), x);
-                return x;
-            })
-            .then(dispach);
-    }, [command, instanceId, client, dispach, push]);
+        if (path) {
+            client
+                .navigate(path)
+                .then(x => x as ForestResponse || EMPTY_FOREST_RESPONSE)
+                .then(x => {
+                    replace(ensureStartSlash(x.path), x)
+                    return x;
+                })
+                .then(dispach);
+        } else {
+            client
+                .invokeCommand(instanceId, command, arg)
+                .then(x => x as ForestResponse || EMPTY_FOREST_RESPONSE)
+                .then(x => {
+                    push(ensureStartSlash(x.path), x);
+                    return x;
+                })
+                .then(dispach);
+        }
+    }, [command, instanceId, path, client, dispach, push, replace]);
     return {
         invoke,
+        path: path,
         description: cmd?.description || "",
         displayName: cmd?.displayName || "",
         tooltip: cmd?.tooltip || ""
