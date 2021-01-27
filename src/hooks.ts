@@ -9,9 +9,14 @@ export const ensureStartSlash = (path: string) => {
     return path[0] !== SLASH ? `/${path}` : path;
 }
 
+interface IForestReactCommand extends Command {
+    invoke: (arg?: any) => void;
+}
+export type ForestReactCommand = IForestReactCommand;
+
 export type ForestHooks = {
     useNavigate: { () : { (template: string) : void } },
-    useCommand: { (command: string) : { (arg?: any) : void } }
+    useCommand: { (command: string) : ForestReactCommand }
 }
 export type ForestStore = {
     useDispatch: () => Dispatch<ForestResponse>,
@@ -26,7 +31,7 @@ export const ForestHooksDefault: ForestHooks & ForestStore = {
     // HOOKS
     useDispatch: () => (_) => { },
     useNavigate: () => (_: string) => { },
-    useCommand: (_: string) => (_?: any) => { },
+    useCommand: (_: string) => ({ invoke: (_?: any) => {}, name: "", path: "", description: "", displayName: "", tooltip: "" }),
     // STORE
     useRootHierarchy: () => EMPTY_ROOT_HIERARCHY,
     useViewState: (_: string) => undefined,
@@ -52,7 +57,7 @@ export const useNavigate = () => {
     }, [client, dispach, replace]);
 };
 
-export const useCommand = ((command: string) => {
+export const useCommand : (command: string) => ForestReactCommand = ((command) => {
     const {useDispatch, useViewState} = useForestSelectors();
     const dispach = useDispatch();
     const {push, replace} = useHistory();
@@ -84,6 +89,7 @@ export const useCommand = ((command: string) => {
     }, [command, instanceId, path, client, dispach, push, replace]);
     return {
         invoke,
+        name: command,
         path: path,
         description: cmd?.description || "",
         displayName: cmd?.displayName || "",
