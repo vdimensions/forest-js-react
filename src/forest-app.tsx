@@ -2,7 +2,7 @@ import React, { ReactNode, memo, useEffect } from "react";
 import { BrowserRouter as Router, Switch, Route, useLocation } from "react-router-dom";
 import { Region, RegionContext } from "./region";
 import { ForestStore, ForestStoreContext, useNavigate } from "./hooks";
-import { IForestClient, ForestResponse, ForestHttpClient } from "@vdimensions/forest-js-frontend";
+import { IForestClient, ForestResponse, NoopClient } from "@vdimensions/forest-js-frontend";
 import { ForestClientContext } from "./client-context";
 import { useForestReducerStore } from "./reducer-store";
 
@@ -51,7 +51,7 @@ export type ForestAppProps = Partial<StoreProps> & {
 export const ForestApp: React.FC<ForestAppProps> = memo((props) => {
     const store = props.store || useForestReducerStore();
     return (
-        <ForestClientContext.Provider value={props.client||ForestHttpClient.create(window.location)}>
+        <ForestClientContext.Provider value={props.client||NoopClient}>
             <Router>
                 <Switch>
                     <Route path="*">
