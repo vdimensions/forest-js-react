@@ -17,13 +17,13 @@
   },
   "devDependencies": {
     "@types/jest": "^25.2.3",
-    "@types/node": "^13.13.40",
-    "@types/react": "^16.14.2",
-    "@types/react-dom": "^16.9.10",
+    "@types/node": "^13.13.52",
+    "@types/react": "^16.14.8",
+    "@types/react-dom": "^16.9.13",
     "@types/react-router-dom": "^5.1.7",
     "tslint": "^5.20.1",
     "tslint-react": "^4.2.0",
-    "typescript": "^3.9.7"
+    "typescript": "^3.9.10"
   },
   "author": "Virtual Dimensions",
   "license": "Apache-2.0",

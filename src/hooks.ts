@@ -9,14 +9,14 @@ export const ensureStartSlash = (path: string) => {
     return path[0] !== SLASH ? `/${path}` : path;
 }
 
-interface IForestReactCommand extends Command {
+interface ForestReactCommand extends Command {
     invoke: (arg?: any) => void;
 }
-export type ForestReactCommand = IForestReactCommand;
+export type TForestReactCommand = ForestReactCommand;
 
 export type ForestHooks = {
     useNavigate: { () : { (template: string) : void } },
-    useCommand: { (command: string) : ForestReactCommand }
+    useCommand: { (command: string) : TForestReactCommand }
 }
 export type ForestStore = {
     useDispatch: () => Dispatch<ForestResponse>,
@@ -57,7 +57,7 @@ export const useNavigate = () => {
     }, [client, dispach, replace]);
 };
 
-export const useCommand : (command: string) => ForestReactCommand = ((command) => {
+export const useCommand : (command: string) => TForestReactCommand = ((command) => {
     const {useDispatch, useViewState} = useForestSelectors();
     const dispach = useDispatch();
     const {push, replace} = useHistory();
