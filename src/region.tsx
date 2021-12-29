@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { View } from "./view";
 import { RegionMap } from "@vdimensions/forest-js-frontend";
-import { useForestSelectors } from "./hooks";
+import { useForestSelectors } from "./store";
 
 export const RegionContext = React.createContext<RegionMap>({});
 const useRegionContext = () => useContext(RegionContext);

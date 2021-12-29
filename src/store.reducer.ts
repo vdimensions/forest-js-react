@@ -8,7 +8,7 @@ import {
     pipe,
     ViewState
 } from "@vdimensions/forest-js-frontend";
-import {ForestHooksDefault, EMPTY_FOREST_RESPONSE} from "./hooks";
+import { EMPTY_FOREST_RESPONSE, NoopStore } from "./store";
 
 type ViewStateMap = { [id: string] : ViewState }
 type ViewStateKeyMap = { [id: string] : boolean }
@@ -59,12 +59,12 @@ export const useForestReducerStore = () => {
         return {
             useRootHierarchy: () => {
                 const data = (mapUndefined(pipe(appStateSelector, rootHierarchySelector)))(state);
-                return data || ForestHooksDefault.useRootHierarchy();
+                return data || NoopStore.useRootHierarchy();
             },
             useViewState: (instanceId: string) => {
                 const map1 = pipe(appStateSelector, viewStateSelector(instanceId));
                 const data = (mapUndefined(map1))(state);
-                return data || ForestHooksDefault.useViewState(instanceId);
+                return data || NoopStore.useViewState(instanceId);
             }
         }
     }, [state]);

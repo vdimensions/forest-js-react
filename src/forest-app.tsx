@@ -1,10 +1,11 @@
 import React, { ReactNode, memo, useEffect } from "react";
 import { BrowserRouter as Router, Switch, Route, useLocation } from "react-router-dom";
 import { Region, RegionContext } from "./region";
-import { ForestStore, ForestStoreContext, useNavigate } from "./hooks";
+import { useNavigate } from "./hooks";
 import { IForestClient, ForestResponse, NoopClient } from "@vdimensions/forest-js-frontend";
 import { ForestClientContext } from "./client-context";
-import { useForestReducerStore } from "./reducer-store";
+import { ForestStore, ForestStoreContext } from "./store";
+import { useForestReducerStore } from "./store.reducer";
 
 type StoreProps = {
     store: ForestStore;

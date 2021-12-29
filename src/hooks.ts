@@ -1,13 +1,10 @@
-import React, { useContext, Dispatch, useCallback } from "react";
-import { ViewState, ForestResponse, RegionMap, Command } from "@vdimensions/forest-js-frontend";
+import { useCallback } from "react";
+import { ForestResponse, Command } from "@vdimensions/forest-js-frontend";
 import { useForestClient } from "./client-context";
 import { useHistory } from "react-router-dom";
 import { useViewContext } from "./view";
-
-const SLASH = '/';
-export const ensureStartSlash = (path: string) => {
-    return path[0] !== SLASH ? `/${path}` : path;
-}
+import { ensureStartSlash } from "./path";
+import { EMPTY_FOREST_RESPONSE, useForestSelectors } from "./store";
 
 interface ForestReactCommand extends Command {
     invoke: (arg?: any) => void;
@@ -18,27 +15,7 @@ export type ForestHooks = {
     useNavigate: { () : { (template: string) : void } },
     useCommand: { (command: string) : TForestReactCommand }
 }
-export type ForestStore = {
-    useDispatch: () => Dispatch<ForestResponse>,
-    useRootHierarchy: () => RegionMap,
-    useViewState: (instanceId: string) => ViewState|undefined,
-}
 
-export const EMPTY_ROOT_HIERARCHY: RegionMap = { "": [] };
-export const EMPTY_FOREST_RESPONSE = ForestResponse.empty();
-
-export const ForestHooksDefault: ForestHooks & ForestStore = {
-    // HOOKS
-    useDispatch: () => (_) => { },
-    useNavigate: () => (_: string) => { },
-    useCommand: (_: string) => ({ invoke: (_?: any) => {}, name: "", path: "", description: "", displayName: "", tooltip: "" }),
-    // STORE
-    useRootHierarchy: () => EMPTY_ROOT_HIERARCHY,
-    useViewState: (_: string) => undefined,
-};
-
-export const ForestStoreContext = React.createContext<ForestStore>(ForestHooksDefault);
-export const useForestSelectors = () => useContext(ForestStoreContext);
 
 export const useNavigate = () => {
     const {useDispatch} = useForestSelectors();

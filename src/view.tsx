@@ -1,5 +1,5 @@
 import React, {useCallback, useContext, useMemo} from "react";
-import { ForestStore } from "./hooks";
+import { ForestStore } from "./store";
 import { RegionContext } from "./region";
 import { ComponentRegistryContext } from "./forest-view";
 
