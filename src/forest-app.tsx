@@ -16,12 +16,8 @@ const createPopStateCallback = (navigate: { (path: string) : void }) => (e: any)
     }
 }
 
-export const DefaultNavigator : React.FC<StoreProps> = memo((props) => { 
-    return (
-        <ForestStoreContext.Provider value={props.store}>
-            {props.children}
-        </ForestStoreContext.Provider>
-    )
+const DefaultNavigator : React.FC<StoreProps> = memo((_) => { 
+    return <React.Fragment />
 });
 
 export const LocationNavigator : React.FC<StoreProps> = memo((props) => { 
@@ -39,17 +35,7 @@ export const LocationNavigator : React.FC<StoreProps> = memo((props) => {
             window.removeEventListener("popstate", popStateCallback);
         }
     }, [pathname, state, navigate, dispatch]);
-    return (
-        <Router>
-            <Switch>
-                <Route path="*">
-                    <ForestStoreContext.Provider value={props.store}>
-                        {props.children}
-                    </ForestStoreContext.Provider>
-                </Route>
-            </Switch>
-        </Router>
-    )
+    return <React.Fragment />
 });
 
 const Shell: React.FC<StoreProps> = memo((props) => {
@@ -72,9 +58,16 @@ export const ForestApp: React.FC<ForestAppProps> = memo((props) => {
     const NavigatorComponent = (props.navigator || DefaultNavigator);
     return (
         <ForestClientContext.Provider value={props.client||NoopClient}>
-          <NavigatorComponent store={store}>
-            <Shell store={store} />
-          </NavigatorComponent>
+            <Router>
+                <Switch>
+                    <Route path="*">
+                        <ForestStoreContext.Provider value={store}>
+                            <NavigatorComponent store={store} />
+                            <Shell store={store} />
+                        </ForestStoreContext.Provider>
+                    </Route>
+                </Switch>
+            </Router>
         </ForestClientContext.Provider>
     );
 });
