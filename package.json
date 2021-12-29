@@ -23,7 +23,10 @@
     "@types/react-router-dom": "^5.3.2",
     "tslint": "^5.20.1",
     "tslint-react": "^4.2.0",
-    "typescript": "^3.9.10"
+    "typescript": "^3.9.10",
+
+    "ansi-regex": ">=5.0.1",
+    "path-parse": ">=1.0.7"
   },
   "author": "Virtual Dimensions",
   "license": "Apache-2.0",
