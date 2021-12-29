@@ -1,9 +1,8 @@
-import { useCallback } from "react";
+import { createContext, useCallback, useContext } from "react";
+import { useHistory } from "react-router-dom";
 import { ForestResponse, Command } from "@vdimensions/forest-js-frontend";
 import { useForestClient } from "./client-context";
-import { useHistory } from "react-router-dom";
 import { useViewContext } from "./view";
-import { ensureStartSlash } from "./path";
 import { EMPTY_FOREST_RESPONSE, useForestSelectors } from "./store";
 
 interface ForestReactCommand extends Command {
@@ -11,65 +10,80 @@ interface ForestReactCommand extends Command {
 }
 export type TForestReactCommand = ForestReactCommand;
 
+export type ForestResponseInterceptor = { (resp: ForestResponse) : ForestResponse };
+export const NoopForestResponseInterceptor: ForestResponseInterceptor = (resp) => resp;
+
 export type ForestHooks = {
-    useNavigate: { () : { (template: string) : void } },
-    useCommand: { (command: string) : TForestReactCommand }
+    useNavigate: { (interceptor?: ForestResponseInterceptor) : { (template: string) : void } },
+    useCommand: { (command: string, interceptor?: ForestResponseInterceptor) : TForestReactCommand }
 }
 
+export const NoopForestHooks : ForestHooks = {
+    useNavigate: (_) => (_: string) => { },
+    useCommand: (_: string) => ({ invoke: (_?: any) => {}, name: "", path: "", description: "", displayName: "", tooltip: "" }),
+}
+
+export const ForestHooksContext = createContext<ForestHooks>(NoopForestHooks);
+const useForestHooks = () => useContext(ForestHooksContext);
 
 export const useNavigate = () => {
-    const {useDispatch} = useForestSelectors();
-    const dispach = useDispatch();
-    const client = useForestClient();
-    const {replace} = useHistory();
-    return useCallback((template: string) => {
-        client
-            .navigate(template)
-            .then(x => x as ForestResponse || EMPTY_FOREST_RESPONSE)
-            .then(x => {
-                replace(ensureStartSlash(x.path), x)
-                return x;
-            })
-            .then(dispach);
-    }, [client, dispach, replace]);
-};
+    const {useNavigate} = useForestHooks();
+    return useNavigate();
+}
 
-export const useCommand : (command: string) => TForestReactCommand = ((command) => {
-    const {useDispatch, useViewState} = useForestSelectors();
-    const dispach = useDispatch();
-    const {push, replace} = useHistory();
-    const client = useForestClient();
-    const instanceId = useViewContext();
-    const viewState = useViewState(instanceId);
-    const cmd: Command|undefined = viewState?.commands[command];
-    const path = cmd?.path || "";
-    const invoke = useCallback((arg?: any) => {
-        if (path) {
+export const useCommand = (command: string) => {
+    const {useCommand} = useForestHooks();
+    return useCommand(command);
+}
+
+export const DefaultForestHooks: ForestHooks = {
+    useNavigate: (interceptor) => {
+        const {useDispatch} = useForestSelectors();
+        const dispach = useDispatch();
+        const client = useForestClient();
+        const i = (interceptor || NoopForestResponseInterceptor);
+        return useCallback((template: string) => {
             client
-                .navigate(path)
+                .navigate(template)
                 .then(x => x as ForestResponse || EMPTY_FOREST_RESPONSE)
-                .then(x => {
-                    replace(ensureStartSlash(x.path), x)
-                    return x;
-                })
+                .then(i)
                 .then(dispach);
-        } else {
-            client
-                .invokeCommand(instanceId, command, arg)
-                .then(x => x as ForestResponse || EMPTY_FOREST_RESPONSE)
-                .then(x => {
-                    push(ensureStartSlash(x.path), x);
-                    return x;
-                })
-                .then(dispach);
+        }, [client, dispach, i]);
+    },
+    
+    useCommand: ((command, interceptor) => {
+        const {useDispatch, useViewState} = useForestSelectors();
+        const dispach = useDispatch();
+        const {push, replace} = useHistory();
+        const client = useForestClient();
+        const instanceId = useViewContext();
+        const viewState = useViewState(instanceId);
+        const cmd: Command|undefined = viewState?.commands[command];
+        const path = cmd?.path || "";
+        const i = (interceptor || NoopForestResponseInterceptor);
+        const invoke = useCallback((arg?: any) => {
+            if (path) {
+                client
+                    .navigate(path)
+                    .then(x => x as ForestResponse || EMPTY_FOREST_RESPONSE)
+                    .then(i)
+                    .then(dispach);
+            } else {
+                client
+                    .invokeCommand(instanceId, command, arg)
+                    .then(x => x as ForestResponse || EMPTY_FOREST_RESPONSE)
+                    .then(i)
+                    .then(dispach);
+            }
+        }, [command, instanceId, path, client, dispach, push, replace, i]);
+        return {
+            invoke,
+            name: command,
+            path: path,
+            description: cmd?.description || "",
+            displayName: cmd?.displayName || "",
+            tooltip: cmd?.tooltip || ""
         }
-    }, [command, instanceId, path, client, dispach, push, replace]);
-    return {
-        invoke,
-        name: command,
-        path: path,
-        description: cmd?.description || "",
-        displayName: cmd?.displayName || "",
-        tooltip: cmd?.tooltip || ""
-    }
-});
+    })
+}
+

@@ -1,11 +1,12 @@
 import React, { ReactNode, memo, useEffect } from "react";
-import { BrowserRouter as Router, Switch, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route, useLocation, useHistory } from "react-router-dom";
 import { Region, RegionContext } from "./region";
-import { useNavigate } from "./hooks";
+import { DefaultForestHooks, ForestHooks, ForestHooksContext, NoopForestResponseInterceptor, useNavigate } from "./hooks";
 import { IForestClient, ForestResponse, NoopClient } from "@vdimensions/forest-js-frontend";
 import { ForestClientContext } from "./client-context";
 import { ForestStore, ForestStoreContext } from "./store";
 import { useForestReducerStore } from "./store.reducer";
+import { ensureStartSlash } from "./path";
 
 type StoreProps = {
     store: ForestStore;
@@ -17,9 +18,32 @@ const createPopStateCallback = (navigate: { (path: string) : void }) => (e: any)
     }
 }
 
-const DefaultNavigator : React.FC<StoreProps> = memo((_) => { 
-    return <React.Fragment />
+const DefaultNavigator : React.FC<StoreProps> = memo((props) => { 
+    return (<ForestHooksContext.Provider value={DefaultForestHooks}>{props.children}</ForestHooksContext.Provider>)
 });
+
+export const LocationForestHooks: ForestHooks = {
+    useNavigate: (interceptor) => {
+        const i = (interceptor || NoopForestResponseInterceptor);
+        const {replace} = useHistory();
+        return DefaultForestHooks.useNavigate(
+            x => {
+                replace(ensureStartSlash(x.path), x);
+                return i(x);
+            });
+    },
+    
+    useCommand: ((command, interceptor) => {
+        const i = (interceptor || NoopForestResponseInterceptor);
+        const {push} = useHistory();
+        return DefaultForestHooks.useCommand(
+            command,
+            x => {
+                push(ensureStartSlash(x.path), x);
+                return i(x);
+            });
+    })
+}
 
 export const LocationNavigator : React.FC<StoreProps> = memo((props) => { 
     const {pathname, state} = useLocation();
@@ -36,7 +60,16 @@ export const LocationNavigator : React.FC<StoreProps> = memo((props) => {
             window.removeEventListener("popstate", popStateCallback);
         }
     }, [pathname, state, navigate, dispatch]);
-    return <React.Fragment />
+    return (
+        <Router>
+            <Switch>
+                <Route path="*">
+                    <ForestHooksContext.Provider value={LocationForestHooks}>
+                        {props.children}
+                    </ForestHooksContext.Provider>
+                </Route>
+            </Switch>
+        </Router>)
 });
 
 const Shell: React.FC<StoreProps> = memo((props) => {
@@ -59,16 +92,11 @@ export const ForestApp: React.FC<ForestAppProps> = memo((props) => {
     const NavigatorComponent = (props.navigator || DefaultNavigator);
     return (
         <ForestClientContext.Provider value={props.client||NoopClient}>
-            <Router>
-                <Switch>
-                    <Route path="*">
-                        <ForestStoreContext.Provider value={store}>
-                            <NavigatorComponent store={store} />
-                            <Shell store={store} />
-                        </ForestStoreContext.Provider>
-                    </Route>
-                </Switch>
-            </Router>
+            <ForestStoreContext.Provider value={store}>
+                <NavigatorComponent store={store}>
+                    <Shell store={store} />
+                </NavigatorComponent>
+            </ForestStoreContext.Provider>
         </ForestClientContext.Provider>
     );
 });
