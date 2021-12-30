@@ -45,7 +45,7 @@ export const LocationForestHooks: ForestHooks = {
     })
 }
 
-export const LocationNavigator : React.FC<StoreProps> = memo((props) => { 
+export const LocationNavigatorInner : React.FC<StoreProps> = memo((props) => { 
     const {pathname, state} = useLocation();
     const {useDispatch} = props.store;
     const navigate = useNavigate();
@@ -61,12 +61,18 @@ export const LocationNavigator : React.FC<StoreProps> = memo((props) => {
         }
     }, [pathname, state, navigate, dispatch]);
     return (
+        <ForestHooksContext.Provider value={LocationForestHooks}>
+            {props.children}
+        </ForestHooksContext.Provider>)
+});
+export const LocationNavigator : React.FC<StoreProps> = memo((props) => { 
+    return (
         <Router>
             <Switch>
                 <Route path="*">
-                    <ForestHooksContext.Provider value={LocationForestHooks}>
+                    <LocationNavigatorInner store={props.store}>
                         {props.children}
-                    </ForestHooksContext.Provider>
+                    </LocationNavigatorInner>
                 </Route>
             </Switch>
         </Router>)
