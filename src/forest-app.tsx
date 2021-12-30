@@ -94,8 +94,8 @@ export type ForestAppProps = Partial<StoreProps> & {
     navigator?: React.FC<StoreProps>,
 };
 export const ForestApp: React.FC<ForestAppProps> = memo((props) => {
-    const store = props.store || useForestReducerStore();
     const NavigatorComponent = (props.navigator || DefaultNavigator);
+    const store = (props.store || useForestReducerStore());
     return (
         <ForestClientContext.Provider value={props.client||NoopClient}>
             <ForestStoreContext.Provider value={store}>
