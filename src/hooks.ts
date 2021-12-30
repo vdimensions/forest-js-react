@@ -43,6 +43,7 @@ export const DefaultForestHooks: ForestHooks = {
         const client = useForestClient();
         const i = (interceptor || NoopForestResponseInterceptor);
         return useCallback((template: string) => {
+            console.debug("DefaultForestHooks navigating to ", template);
             client
                 .navigate(template)
                 .then(x => x as ForestResponse || EMPTY_FOREST_RESPONSE)

@@ -54,6 +54,7 @@ export const LocationNavigatorInner : React.FC<StoreProps> = memo((props) => {
     useEffect(() => {
         window.addEventListener("popstate", popStateCallback);
         if (!state || !(state instanceof ForestResponse)) {
+            console.debug("navigating to ", pathname);
             navigate(pathname);
         }
         return () => {
