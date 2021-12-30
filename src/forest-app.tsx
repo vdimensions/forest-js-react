@@ -28,6 +28,7 @@ export const LocationForestHooks: ForestHooks = {
         const {replace} = useHistory();
         return DefaultForestHooks.useNavigate(
             x => {
+                console.debug("LocationForestHooks intercepted navigate response for path ", x.path);
                 replace(ensureStartSlash(x.path), x);
                 return i(x);
             });
@@ -39,6 +40,7 @@ export const LocationForestHooks: ForestHooks = {
         return DefaultForestHooks.useCommand(
             command,
             x => {
+                console.debug("LocationForestHooks intercepted command response for path ", x.path);
                 push(ensureStartSlash(x.path), x);
                 return i(x);
             });
@@ -61,22 +63,21 @@ export const LocationNavigatorInner : React.FC<StoreProps> = memo((props) => {
             window.removeEventListener("popstate", popStateCallback);
         }
     }, [pathname, state, navigate, dispatch]);
-    return (
-        <ForestHooksContext.Provider value={LocationForestHooks}>
-            {props.children}
-        </ForestHooksContext.Provider>)
+    return (<>{props.children}</>)
 });
 export const LocationNavigator : React.FC<StoreProps> = memo((props) => { 
     return (
-        <Router>
-            <Switch>
-                <Route path="*">
-                    <LocationNavigatorInner store={props.store}>
-                        {props.children}
-                    </LocationNavigatorInner>
-                </Route>
-            </Switch>
-        </Router>)
+        <ForestHooksContext.Provider value={LocationForestHooks}>
+            <Router>
+                <Switch>
+                    <Route path="*">
+                        <LocationNavigatorInner store={props.store}>
+                            {props.children}
+                        </LocationNavigatorInner>
+                    </Route>
+                </Switch>
+            </Router>
+        </ForestHooksContext.Provider>)
 });
 
 const Shell: React.FC<StoreProps> = memo((props) => {

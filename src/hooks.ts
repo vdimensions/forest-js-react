@@ -19,21 +19,8 @@ export type ForestHooks = {
 }
 
 export const NoopForestHooks : ForestHooks = {
-    useNavigate: (_) => (_: string) => { },
+    useNavigate: () => (_: string) => { },
     useCommand: (_: string) => ({ invoke: (_?: any) => {}, name: "", path: "", description: "", displayName: "", tooltip: "" }),
-}
-
-export const ForestHooksContext = createContext<ForestHooks>(NoopForestHooks);
-const useForestHooks = () => useContext(ForestHooksContext);
-
-export const useNavigate = () => {
-    const {useNavigate} = useForestHooks();
-    return useNavigate();
-}
-
-export const useCommand = (command: string) => {
-    const {useCommand} = useForestHooks();
-    return useCommand(command);
 }
 
 export const DefaultForestHooks: ForestHooks = {
@@ -86,5 +73,18 @@ export const DefaultForestHooks: ForestHooks = {
             tooltip: cmd?.tooltip || ""
         }
     })
+}
+
+export const ForestHooksContext = createContext<ForestHooks>(NoopForestHooks);
+const useForestHooks = () => useContext(ForestHooksContext);
+
+export const useNavigate = () => {
+    const {useNavigate} = useForestHooks();
+    return useNavigate();
+}
+
+export const useCommand = (command: string) => {
+    const {useCommand} = useForestHooks();
+    return useCommand(command);
 }
 
