@@ -1,0 +1,39 @@
+image: node:14-buster
+
+cache:
+  paths:
+    - node_modules
+    - version.txt
+    - dist
+
+stages:
+  - build
+  - deploy
+
+build:
+  stage: build
+  script:
+    - echo -e "@${CI_PROJECT_ROOT_NAMESPACE}:registry=${CI_API_V4_URL}/packages/npm/" > .npmrc
+    - if [[ -f ./version.txt ]]; then eval "npm version $(cat version.txt) --allow-same-version --force --no-git-tag-version"; fi;
+    - npm install
+    - npm version patch --force --no-git-tag-version
+    - npm run build
+    - node -e 'console.log(require("./package.json").version);' > version.txt
+  allow_failure: false
+  artifacts:
+    paths:
+      - dist
+    when: on_success
+  only:
+    - merge_requests
+    - master
+
+publish:
+  stage: deploy
+  script:
+    - cd dist
+    - echo -e "@${CI_PROJECT_ROOT_NAMESPACE}:registry=${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/npm/" > .npmrc
+    - echo -e "${CI_API_V4_URL#https?}/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=${CI_JOB_TOKEN}" >> .npmrc
+    - npm publish
+  only:
+    - master
