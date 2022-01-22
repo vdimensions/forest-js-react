@@ -1,5 +1,5 @@
 import React, { ReactNode, memo, useEffect } from "react";
-import { BrowserRouter as Router, Switch, Route, useLocation, useHistory } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch, useHistory, useLocation } from "react-router-dom";
 import { Region, RegionContext } from "./region";
 import { DefaultForestHooks, ForestHooks, ForestHooksContext, NoopForestResponseInterceptor, useNavigate } from "./hooks";
 import { IForestClient, ForestResponse, NoopClient } from "@vdimensions/forest-js-frontend";
