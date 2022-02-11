@@ -14,13 +14,13 @@ export type ForestViewProps = {
     instanceId: string,
     selectors: ForestStore
 }
-export const View : React.FC<ForestViewProps> = React.memo((props) => {
+export const View : React.FC<ForestViewProps> = React.memo(({ instanceId, selectors }) => {
     const viewStateCallback = useCallback(() => {
-        const {useViewState} = props.selectors;
-        const viewState = useViewState(props.instanceId);
-        const viewKey = `${(viewState && viewState.name) || ""} #${props.instanceId}`;
+        const {useViewState} = selectors;
+        const viewState = useViewState(instanceId);
+        const viewKey = `${(viewState && viewState.name) || ""} #${instanceId}`;
         return { viewState, viewKey, regions: viewState?.regions || EMPTY_REGIONS };
-    }, [props.instanceId, props.selectors]);
+    }, [instanceId, selectors]);
 
     const { viewState, viewKey, regions } = viewStateCallback();
 
@@ -35,7 +35,7 @@ export const View : React.FC<ForestViewProps> = React.memo((props) => {
     const ViewComponent: React.FC<ModelWrapper> = viewComponentCallback();
 
     return (
-        <ViewContext.Provider value={props.instanceId}>
+        <ViewContext.Provider value={instanceId}>
             <RegionContext.Provider value={regions}>
                 <ViewComponent key={viewKey} model={viewState?.model} />   
             </RegionContext.Provider>

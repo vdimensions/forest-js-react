@@ -9,7 +9,7 @@ const useRegionContext = () => useContext(RegionContext);
 type RegionProps = {
     name: string
 }
-export const Region = React.memo((props: RegionProps) => {
+const Region = React.memo((props: RegionProps) => {
     const regionContextData = useRegionContext();
     const selectors = useForestSelectors();
     const regionData = regionContextData[props.name]||[];
@@ -19,3 +19,5 @@ export const Region = React.memo((props: RegionProps) => {
         </React.Fragment>
     );
 });
+
+export default Region;

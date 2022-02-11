@@ -16,5 +16,7 @@ export const NoopStore : ForestStore = {
     useViewState: (_: string) => undefined
 }
 
-export const ForestStoreContext = React.createContext<ForestStore>(NoopStore);
+const ForestStoreContext = React.createContext<ForestStore>(NoopStore);
 export const useForestSelectors = () => useContext(ForestStoreContext);
+
+export default ForestStoreContext;

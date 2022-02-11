@@ -3,9 +3,8 @@ import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import typescript from "rollup-plugin-typescript2";
 import copy from "rollup-plugin-copy";
-import license from "rollup-plugin-license";
+import { embedLicense } from "@vdimensions/rollup-js-helpers";
 
-const path = require('path');
 const packageJson = require("./package.json");
 
 export default {
@@ -39,32 +38,6 @@ export default {
         }
       ]
     }),
-    license({
-      sourcemap: true,
-      cwd: __dirname,//'.', // Default is process.cwd()
-
-      banner: {
-        commentStyle: 'regular', // The default
-
-        content: {
-          file: path.join(__dirname, 'LICENSE'),
-          encoding: 'utf-8', // Default is utf-8
-        },
-
-        // // Optional, may be an object or a function returning an object.
-        // data() {
-        //   return {
-        //   };
-        // },
-      },
-
-      // thirdParty: {
-      //   includePrivate: false, // Default is false.
-      //   output: {
-      //     file: path.join(__dirname, 'dist', 'dependencies.txt'),
-      //     encoding: 'utf-8', // Default is utf-8.
-      //   },
-      // },
-    }),
+    embedLicense({workDir: __dirname}),
   ]
 };

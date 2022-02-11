@@ -88,3 +88,4 @@ export const useCommand = (command: string) => {
     return useCommand(command);
 }
 
+export default ForestHooksContext;

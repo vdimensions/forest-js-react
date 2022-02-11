@@ -1,12 +1,12 @@
 import React, { ReactNode, memo, useEffect } from "react";
 import { BrowserRouter as Router, Route, Switch, useHistory, useLocation } from "react-router-dom";
-import { Region, RegionContext } from "./region";
-import { DefaultForestHooks, ForestHooks, ForestHooksContext, NoopForestResponseInterceptor, useNavigate } from "./hooks";
+import ForestHooksContext, { DefaultForestHooks, ForestHooks, NoopForestResponseInterceptor, useNavigate } from "./hooks";
 import { IForestClient, ForestResponse, NoopClient } from "@vdimensions/forest-js-frontend";
 import { ForestClientContext } from "./client-context";
-import { ForestStore, ForestStoreContext } from "./store";
+import ForestStoreContext, { ForestStore } from "./store";
 import { useForestReducerStore } from "./store.reducer";
 import { ensureStartSlash } from "./path";
+import Shell from "./forest-shell";
 
 type StoreProps = {
     store: ForestStore;
@@ -80,15 +80,7 @@ export const LocationNavigator : React.FC<StoreProps> = memo((props) => {
         </ForestHooksContext.Provider>)
 });
 
-const Shell: React.FC<StoreProps> = memo((props) => {
-    const {useRootHierarchy} = props.store;
-    const hierarchy = useRootHierarchy();
-    return (
-        <RegionContext.Provider value={hierarchy}>
-            <Region name="" />
-        </RegionContext.Provider>
-    );
-});
+
 
 export type ForestAppProps = Partial<StoreProps> & {
     loadingIndicator: NonNullable<ReactNode>|null,
@@ -97,12 +89,13 @@ export type ForestAppProps = Partial<StoreProps> & {
 };
 export const ForestApp: React.FC<ForestAppProps> = memo((props) => {
     const NavigatorComponent = (props.navigator || DefaultNavigator);
-    const store = (props.store || useForestReducerStore());
+    const defaultStore = useForestReducerStore();
+    const store = (props.store || defaultStore);
     return (
         <ForestClientContext.Provider value={props.client||NoopClient}>
             <ForestStoreContext.Provider value={store}>
                 <NavigatorComponent store={store}>
-                    <Shell store={store} />
+                    <Shell />
                 </NavigatorComponent>
             </ForestStoreContext.Provider>
         </ForestClientContext.Provider>
