@@ -8,7 +8,7 @@ semgrep-sast:
   cache: {}
 
 sast:
-  stage: sast
+  stage: build
 
 cache:
   paths:
@@ -17,7 +17,6 @@ cache:
     - dist
 
 stages:
-  - sast
   - build
   - deploy
 
