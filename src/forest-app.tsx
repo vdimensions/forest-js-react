@@ -11,10 +11,6 @@ import Shell from "./forest-shell";
 type StoreProps = {
     store: ForestStore;
 };
-type NavigatorProps = {
-    store: ForestStore;
-    landingPage?: string
-}
 
 const createPopStateCallback = (navigate: { (path: string) : void }) => (e: any) => {
     if (e.state && e.state.state) {
@@ -22,7 +18,7 @@ const createPopStateCallback = (navigate: { (path: string) : void }) => (e: any)
     }
 }
 
-const DefaultNavigator : React.FC<NavigatorProps> = memo((props) => { 
+const DefaultNavigator : React.FC<StoreProps> = memo((props) => { 
     return (<ForestHooksContext.Provider value={DefaultForestHooks}>{props.children}</ForestHooksContext.Provider>)
 });
 
@@ -51,18 +47,17 @@ export const LocationForestHooks: ForestHooks = {
     })
 }
 
-export const LocationNavigatorInner : React.FC<NavigatorProps> = memo((props) => { 
+export const LocationNavigatorInner : React.FC<StoreProps> = memo((props) => { 
     const {pathname, state} = useLocation();
     const {useDispatch} = props.store;
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const popStateCallback = createPopStateCallback(navigate);
     useEffect(() => {
-        const p = (pathname || props.landingPage || "");
         window.addEventListener("popstate", popStateCallback);
         if (!state || !(state instanceof ForestResponse)) {
-            console.debug("navigating to ", p);
-            navigate(p);
+            console.debug("navigating to ", pathname);
+            navigate(pathname);
         }
         return () => {
             window.removeEventListener("popstate", popStateCallback);
@@ -70,13 +65,13 @@ export const LocationNavigatorInner : React.FC<NavigatorProps> = memo((props) =>
     }, [pathname, state, navigate, dispatch]);
     return (<>{props.children}</>)
 });
-export const LocationNavigator : React.FC<NavigatorProps> = memo((props) => { 
+export const LocationNavigator : React.FC<StoreProps> = memo((props) => { 
     return (
         <ForestHooksContext.Provider value={LocationForestHooks}>
             <Router>
                 <Switch>
                     <Route path="*">
-                        <LocationNavigatorInner store={props.store} landingPage={props.landingPage}>
+                        <LocationNavigatorInner store={props.store}>
                             {props.children}
                         </LocationNavigatorInner>
                     </Route>
@@ -90,8 +85,7 @@ export const LocationNavigator : React.FC<NavigatorProps> = memo((props) => {
 export type ForestAppProps = Partial<StoreProps> & {
     loadingIndicator: NonNullable<ReactNode>|null,
     client?: IForestClient,
-    navigator?: React.FC<StoreProps>,
-    landingPage?: string
+    navigator?: React.FC<StoreProps>
 };
 export const ForestApp: React.FC<ForestAppProps> = memo((props) => {
     const NavigatorComponent = (props.navigator || DefaultNavigator);
@@ -100,7 +94,7 @@ export const ForestApp: React.FC<ForestAppProps> = memo((props) => {
     return (
         <ForestClientContext.Provider value={props.client||NoopClient}>
             <ForestStoreContext.Provider value={store}>
-                <NavigatorComponent store={store} landingPage={props.landingPage}>
+                <NavigatorComponent store={store}>
                     <Shell />
                 </NavigatorComponent>
             </ForestStoreContext.Provider>
