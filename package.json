@@ -23,7 +23,9 @@
     "build": "rimraf dist && rollup -c",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "dependencies": {},
+  "dependencies": {
+    
+  },
   "peerDependencies": {
     "@vdimensions/forest-js-frontend": "^1.2.17",
     "react": "^16.14.0",
@@ -43,6 +45,7 @@
     "@vdimensions/forest-js-frontend": "^1.2.18",
     "@vdimensions/rollup-js-helpers": "^0.1.10",
     "ansi-regex": ">=5.0.1",
+    "minimist": ">=1.2.6",
     "path-parse": ">=1.0.7",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
