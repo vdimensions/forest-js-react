@@ -44,7 +44,7 @@
     "@vdimensions/rollup-js-helpers": "^0.1.10",
     "ansi-regex": ">=5.0.1",
     "minimist": ">=1.2.6",
-    "moment": ">=2.29.2",
+    "moment": ">=2.29.4",
     "path-parse": ">=1.0.7",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
